@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Библиотека - управление книгами</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .stat-card .number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .stat-card .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: white;
+            padding: 10px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: none;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s;
+            min-width: 120px;
+        }
+
+        .tab:hover {
+            background: #f0f0f0;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #555;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .status-available {
+            background: #d1fae5;
+            color: #10b981;
+        }
+
+        .status-borrowed {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            padding-left: 40px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>');
+            background-repeat: no-repeat;
+            background-position: 15px center;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification.success {
+            background: #10b981;
+        }
+
+        .notification.error {
+            background: #ef4444;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📚 Система управления библиотекой</h1>
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="number" id="totalBooks">0</div>
+                <div class="label">Всего книг</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="availableBooks">0</div>
+                <div class="label">Доступно</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="totalPatrons">0</div>
+                <div class="label">Читателей</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="activeBorrowings">0</div>
+                <div class="label">Выдано книг</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('books', event)">📖 Книги</button>
+        <button class="tab" onclick="switchTab('patrons', event)">👥 Читатели</button>
+        <button class="tab" onclick="switchTab('borrowings', event)">📋 Выдачи</button>
+        <button class="tab" onclick="switchTab('overdue', event)">⚠️ Просроченные</button>
+    </div>
+
+    <!-- Books Tab -->
+    <div id="booksTab" class="tab-content">
+        <div class="content-grid">
+            <div class="card">
+                <h2>📖 Список книг</h2>
+                <div class="search-box">
+                    <input type="text" id="bookSearch" placeholder="Поиск по названию или автору..." onkeyup="searchBooks()">
+                </div>
+                <div class="table-container" id="booksList">
+                    <div class="loading">Загрузка...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>➕ Добавить книгу</h2>
+                <form id="addBookForm" onsubmit="addBook(event)">
+                    <div class="form-group">
+                        <label>Название книги</label>
+                        <input type="text" id="bookTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Автор</label>
+                        <input type="text" id="bookAuthor" required>
+                    </div>
+                    <div class="form-group">
+                        <label>ISBN</label>
+                        <input type="text" id="bookIsbn">
+                    </div>
+                    <div class="form-group">
+                        <label>Год публикации</label>
+                        <input type="number" id="bookYear" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Добавить книгу</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patrons Tab -->
+    <div id="patronsTab" class="tab-content" style="display: none;">
+        <div class="content-grid">
+            <div class="card">
+                <h2>👥 Список читателей</h2>
+                <div class="search-box">
+                    <input type="text" id="patronSearch" placeholder="Поиск по имени..." onkeyup="searchPatrons()">
+                </div>
+                <div class="table-container" id="patronsList">
+                    <div class="loading">Загрузка...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>➕ Добавить читателя</h2>
+                <form id="addPatronForm" onsubmit="addPatron(event)">
+                    <div class="form-group">
+                        <label>Имя читателя</label>
+                        <input type="text" id="patronName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="patronEmail">
+                    </div>
+                    <div class="form-group">
+                        <label>Телефон</label>
+                        <input type="text" id="patronPhone">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Добавить читателя</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Borrowings Tab -->
+    <div id="borrowingsTab" class="tab-content" style="display: none;">
+        <div class="content-grid">
+            <div class="card">
+                <h2>📋 Активные выдачи</h2>
+                <div class="table-container" id="borrowingsList">
+                    <div class="loading">Загрузка...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>➕ Выдать книгу</h2>
+                <form id="borrowForm" onsubmit="borrowBook(event)">
+                    <div class="form-group">
+                        <label>Книга</label>
+                        <select id="borrowBookId" required>
+                            <option value="">Выберите книгу...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Читатель</label>
+                        <select id="borrowPatronId" required>
+                            <option value="">Выберите читателя...</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Выдать книгу</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overdue Tab -->
+    <div id="overdueTab" class="tab-content" style="display: none;">
+        <div class="card">
+            <h2>⚠️ Просроченные книги</h2>
+            <div class="table-container" id="overdueList">
+                <div class="loading">Загрузка...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = 'http://localhost:8080/api';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Page loaded, loading data...');
+        loadAllData();
+    });
+
+    function loadAllData() {
+        loadBooks();
+        loadPatrons();
+        loadBorrowings();
+        loadOverdue();
+        loadStats();
+        loadSelects();
+    }
+
+    function switchTab(tabName, event) {
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        event.target.classList.add('active');
+
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.style.display = 'none';
+        });
+        document.getElementById(tabName + 'Tab').style.display = 'block';
+
+        // Обновляем данные при переключении вкладки
+        if (tabName === 'borrowings') loadBorrowings();
+        if (tabName === 'overdue') loadOverdue();
+        if (tabName === 'books') loadBooks();
+        if (tabName === 'patrons') loadPatrons();
+    }
+
+    function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    async function loadStats() {
+        try {
+            const books = await fetch(API_URL + '/books').then(r => r.json());
+            const patrons = await fetch(API_URL + '/patrons').then(r => r.json());
+
+            const availableBooks = books.filter(b => b.available).length;
+            const activeBorrowings = books.filter(b => !b.available).length;
+
+            document.getElementById('totalBooks').textContent = books.length;
+            document.getElementById('availableBooks').textContent = availableBooks;
+            document.getElementById('totalPatrons').textContent = patrons.length;
+            document.getElementById('activeBorrowings').textContent = activeBorrowings;
+        } catch (error) {
+            console.error('Error loading stats:', error);
+        }
+    }
+
+    async function loadBooks() {
+        console.log('Loading books...');
+        try {
+            const response = await fetch(API_URL + '/books');
+            const books = await response.json();
+            displayBooks(books);
+        } catch (error) {
+            console.error('Error loading books:', error);
+            document.getElementById('booksList').innerHTML = '<p style="text-align: center; padding: 50px; color: #999;">Ошибка загрузки</p>';
+        }
+    }
+
+    function displayBooks(books) {
+        const container = document.getElementById('booksList');
+
+        if (!books || books.length === 0) {
+            container.innerHTML = '<p style="text-align: center; padding: 50px; color: #999;">Нет книг</p>';
+            return;
+        }
+
+        let html = '<table><thead><tr><th>Название</th><th>Автор</th><th>Год</th><th>Статус</th><th>Действия</th></tr></thead><tbody>';
+
+        books.forEach(book => {
+            html += `
+                <tr>
+                    <td>${book.title}</td>
+                    <td>${book.author}</td>
+                    <td>${book.publicationYear}</td>
+                    <td>
+                        <span class="status-badge ${book.available ? 'status-available' : 'status-borrowed'}">
+                            ${book.available ? 'Доступна' : 'Выдана'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            ${book.available ?
+                                `<button class="btn btn-sm btn-success" onclick="quickBorrow(${book.id})">Выдать</button>` :
+                                `<button class="btn btn-sm btn-danger" onclick="quickReturn(${book.id})">Вернуть</button>`
+                            }
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += '</tbody></table>';
+        container.innerHTML = html;
+    }
+
+    async function addBook(event) {
+        event.preventDefault();
+
+        const book = {
+            title: document.getElementById('bookTitle').value,
+            author: document.getElementById('bookAuthor').value,
+            isbn: document.getElementById('bookIsbn').value,
+            publicationYear: parseInt(document.getElementById('bookYear').value)
+        };
+
+        try {
+            const response = await fetch(API_URL + '/books', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(book)
+            });
+
+            if (response.ok) {
+                showNotification('Книга успешно добавлена!');
+                document.getElementById('addBookForm').reset();
+                loadAllData();
+            } else {
+                const error = await response.text();
+                showNotification('Ошибка: ' + error, 'error');
+            }
+        } catch (error) {
+            showNotification('Ошибка соединения с сервером', 'error');
+        }
+    }
+
+    async function loadPatrons() {
+        console.log('Loading patrons...');
+        try {
+            const response = await fetch(API_URL + '/patrons');
+            const patrons = await response.json();
+            displayPatrons(patrons);
+        } catch (error) {
+            console.error('Error loading patrons:', error);
+            document.getElementById('patronsList').innerHTML = '<p style="text-align: center; padding: 50px; color: #999;">Ошибка загрузки</p>';
+        }
+    }
+
+    function displayPatrons(patrons) {
+        const container = document.getElementById('patronsList');
+
+        if (!patrons || patrons.length === 0) {
+            container.innerHTML = '<p style="text-align: center; padding: 50px; color: #999;">Нет читателей</p>';
+            return;
+        }
+
+        let html = '<table><thead><tr><th>Имя</th><th>Email</th><th>Телефон</th><th>Дата регистрации</th></tr></thead><tbody>';
+
+        patrons.forEach(patron => {
+            html += `
+                <tr>
+                    <td>${patron.name}</td>
+                    <td>${patron.email || '-'}</td>
+                    <td>${patron.phone || '-'}</td>
+                    <td>${patron.membershipDate ? new Date(patron.membershipDate).toLocaleDateString() : '-'}</td>
+                </tr>
+            `;
+        });
+
+        html += '</tbody></table>';
+        container.innerHTML = html;
+    }
+
+    async function addPatron(event) {
+        event.preventDefault();
+
+        const patron = {
+            name: document.getElementById('patronName').value,
+            email: document.getElementById('patronEmail').value,
+            phone: document.getElementById('patronPhone').value
+        };
+
+        try {
+            const response = await fetch(API_URL + '/patrons', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(patron)
+            });
+
+            if (response.ok) {
+                showNotification('Читатель успешно добавлен!');
+                document.getElementById('addPatronForm').reset();
+                loadAllData();
+            } else {
+                const error = await response.text();
+                showNotification('Ошибка: ' + error, 'error');
+            }
+        } catch (error) {
+            showNotification('Ошибка соединения с сервером', 'error');
+        }
+    }
+
+    async function loadBorrowings() {
+        console.log('Loading borrowings...');
+        try {
+            const response = await fetch(API_URL + '/books');
+            const books = await response.json();
+            const borrowedBooks = books.filter(b => !b.available);
+            displayBorrowings(borrowedBooks);
+        } catch (error) {
+            console.error('Error loading borrowings:', error);
+            document.getElementById('borrowingsList').innerHTML = '<p style="text-align: center; padding: 50px; color: #999;">Ошибка загрузки</p>';
+        }
+    }
+
+    function displayBorrowings(books) {
+        const container = document.getElementById('borrowingsList');
+
+        if (!books || books.length === 0) {
+            container.innerHTML = '<p style="text-align: center; padding: 50px; color: #999;">Нет активных выдач</p>';
+            return;
+        }
+
+        let html = '<table><thead><tr><th>Книга</th><th>Автор</th><th>Статус</th></tr></thead><tbody>';
+
+        books.forEach(book => {
+            html += `
+                <tr>
+                    <td>${book.title}</td>
+                    <td>${book.author}</td>
+                    <td><span class="status-badge status-borrowed">Выдана</span></td>
+                </tr>
+            `;
+        });
+
+        html += '</tbody></table>';
+        container.innerHTML = html;
+    }
+
+    async function loadOverdue() {
+        console.log('Loading overdue...');
+        try {
+            const response = await fetch(API_URL + '/borrowings/overdue');
+            const records = await response.json();
+            displayOverdue(records);
+        } catch (error) {
+            console.error('Error loading overdue:', error);
+            document.getElementById('overdueList').innerHTML = '<p style="text-align: center; padding: 50px; color: #999;">Ошибка загрузки</p>';
+        }
+    }
+
+    function displayOverdue(records) {
+        const container = document.getElementById('overdueList');
+
+        if (!records || records.length === 0) {
+            container.innerHTML = '<p style="text-align: center; padding: 50px; color: #999;">Нет просроченных книг</p>';
+            return;
+        }
+
+        let html = '<table><thead><tr><th>Книга</th><th>Читатель</th><th>Должна быть возвращена</th></tr></thead><tbody>';
+
+        records.forEach(record => {
+            html += `
+                <tr>
+                    <td>${record.book?.title || 'Неизвестно'}</td>
+                    <td>${record.patron?.name || 'Неизвестно'}</td>
+                    <td>${record.dueDate ? new Date(record.dueDate).toLocaleDateString() : 'Неизвестно'}</td>
+                </tr>
+            `;
+        });
+
+        html += '</tbody></table>';
+        container.innerHTML = html;
+    }
+
+    async function loadSelects() {
+        try {
+            const books = await fetch(API_URL + '/books').then(r => r.json());
+            const patrons = await fetch(API_URL + '/patrons').then(r => r.json());
+
+            const bookSelect = document.getElementById('borrowBookId');
+            if (bookSelect) {
+                bookSelect.innerHTML = '<option value="">Выберите книгу...</option>';
+                books.filter(b => b.available).forEach(book => {
+                    bookSelect.innerHTML += `<option value="${book.id}">${book.title} (${book.author})</option>`;
+                });
+            }
+
+            const patronSelect = document.getElementById('borrowPatronId');
+            if (patronSelect) {
+                patronSelect.innerHTML = '<option value="">Выберите читателя...</option>';
+                patrons.forEach(patron => {
+                    patronSelect.innerHTML += `<option value="${patron.id}">${patron.name}</option>`;
+                });
+            }
+        } catch (error) {
+            console.error('Error loading selects:', error);
+        }
+    }
+
+    async function borrowBook(event) {
+        event.preventDefault();
+
+        const bookId = document.getElementById('borrowBookId').value;
+        const patronId = document.getElementById('borrowPatronId').value;
+
+        if (!bookId || !patronId) {
+            showNotification('Выберите книгу и читателя', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/borrow/${bookId}/patron/${patronId}`, {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                showNotification('Книга успешно выдана!');
+                loadAllData();
+            } else {
+                const error = await response.text();
+                showNotification('Ошибка: ' + error, 'error');
+            }
+        } catch (error) {
+            showNotification('Ошибка соединения с сервером', 'error');
+        }
+    }
+
+    async function quickBorrow(bookId) {
+        try {
+            const patrons = await fetch(API_URL + '/patrons').then(r => r.json());
+
+            if (patrons.length === 0) {
+                showNotification('Нет читателей', 'error');
+                return;
+            }
+
+            const response = await fetch(`${API_URL}/borrow/${bookId}/patron/${patrons[0].id}`, {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                showNotification('Книга успешно выдана!');
+                loadAllData();
+            } else {
+                const error = await response.text();
+                showNotification('Ошибка: ' + error, 'error');
+            }
+        } catch (error) {
+            showNotification('Ошибка соединения с сервером', 'error');
+        }
+    }
+
+    async function quickReturn(bookId) {
+        try {
+            const patrons = await fetch(API_URL + '/patrons').then(r => r.json());
+
+            for (const patron of patrons) {
+                const response = await fetch(`${API_URL}/return/${bookId}/patron/${patron.id}`, {
+                    method: 'PUT'
+                });
+
+                if (response.ok) {
+                    showNotification('Книга возвращена!');
+                    loadAllData();
+                    return;
+                }
+            }
+
+            showNotification('Не найдена запись о выдаче', 'error');
+        } catch (error) {
+            showNotification('Ошибка соединения с сервером', 'error');
+        }
+    }
+
+    function searchBooks() {
+        const searchText = document.getElementById('bookSearch').value.toLowerCase();
+        const rows = document.querySelectorAll('#booksList tbody tr');
+
+        rows.forEach(row => {
+            if (row.cells[0] && row.cells[1]) {
+                const title = row.cells[0].textContent.toLowerCase();
+                const author = row.cells[1].textContent.toLowerCase();
+                row.style.display = (title.includes(searchText) || author.includes(searchText)) ? '' : 'none';
+            }
+        });
+    }
+
+    function searchPatrons() {
+        const searchText = document.getElementById('patronSearch').value.toLowerCase();
+        const rows = document.querySelectorAll('#patronsList tbody tr');
+
+        rows.forEach(row => {
+            if (row.cells[0]) {
+                const name = row.cells[0].textContent.toLowerCase();
+                row.style.display = name.includes(searchText) ? '' : 'none';
+            }
+        });
+    }
+
+    setInterval(loadAllData, 30000);
+</script>
+</body>
+</html>
